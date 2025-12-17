@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "dev:browser-extension": "pnpm --filter=browser-extension dev",
+    "type-check:browser-extension": "pnpm --filter=browser-extension type-check",
     "dev:server": "pnpm --filter=mock-proxy-server start:dev",
     "type-check:server": "pnpm --filter=mock-proxy-server type-check",
+    "type-check": "pnpm type-check:browser-extension && pnpm type-check:server",
     "format": "biome check --write --unsafe",
     "prepare": "husky"
   },
