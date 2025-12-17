@@ -17,6 +17,7 @@ const config: ForgeConfig = {
     icon: path.resolve(__dirname, 'assets', 'icon'),
     extraResource: ['resources', 'assets'],
     appCategoryType: 'public.app-category.utilities',
+    executableName: 'StarMesh',
   },
   hooks: {
     postMake: async (_config, makeResults) => {
@@ -71,10 +72,18 @@ const config: ForgeConfig = {
     }),
     new MakerSquirrel({ iconUrl: 'assets/icon.ico' }),
     new MakerRpm({
-      options: { icon: 'assets/icon.png', categories: ['Network', 'Utility'] },
+      options: {
+        bin: 'StarMesh',
+        icon: 'assets/icon.png',
+        categories: ['Network', 'Utility'],
+      },
     }),
     new MakerDeb({
-      options: { icon: 'assets/icon.png', categories: ['Network', 'Utility'] },
+      options: {
+        bin: 'StarMesh',
+        icon: 'assets/icon.png',
+        categories: ['Network', 'Utility'],
+      },
     }),
   ],
   publishers: [
