@@ -1,0 +1,255 @@
+# https://github.com/electron/fiddle/blob/main/.github/workflows/release.yml
+
+name: Release
+
+on:
+  push:
+    branches:
+      - 'v*'
+      - 'v*-beta.*'
+    paths:
+      - 'app/desktop/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # - os: macos-latest
+          #   arch: arm64
+          # - os: macos-15-intel
+          #   arch: x64
+          
+          # - os: windows-latest
+          #   arch: x64
+          # - os: windows-11-arm
+          #   arch: arm64
+          # - os: windows-latest
+          #   arch: ia32
+          
+          - os: ubuntu-latest
+            arch: x64
+          - os: ubuntu-24.04-arm
+            arch: armv7l
+          - os: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: "${{ matrix.os }}"
+
+    permissions:
+      actions: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+
+      - name: Map OS/Arch to Makefile target
+        id: make_target
+        shell: bash
+        run: |
+          TARGET_NAME=$(
+            if [[ "${{ matrix.os }}" == ubuntu* ]]; then
+              if [[ "${{ matrix.arch }}" == "x64" ]]; then echo "linux-x64"
+              elif [[ "${{ matrix.arch }}" == "arm64" ]]; then echo "linux-arm64"
+              elif [[ "${{ matrix.arch }}" == "armv7l" ]]; then echo "linux-arm"
+              fi
+            elif [[ "${{ matrix.os }}" == macos* ]]; then
+              if [[ "${{ matrix.arch }}" == "arm64" ]]; then echo "macos-arm64"
+              elif [[ "${{ matrix.arch }}" == "x64" ]]; then echo "macos-x64"
+              fi
+            elif [[ "${{ matrix.os }}" == windows* ]]; then
+              if [[ "${{ matrix.arch }}" == "x64" ]]; then echo "win-x64"
+              elif [[ "${{ matrix.arch }}" == "arm64" ]]; then echo "win-arm64"
+              elif [[ "${{ matrix.arch }}" == "ia32" ]]; then echo "win-ia32"
+              fi
+            fi
+          )
+          echo "target=$TARGET_NAME" >> $GITHUB_OUTPUT
+
+      - name: Build Go IPC Server
+        working-directory: app/desktop/resources
+        run: make ${{ steps.make_target.outputs.target }}
+      
+      - name: Set PRE_RELEASE and BETA_VERSION environment variables
+        run: |
+          PRE_RELEASE_VALUE="false"
+          BETA_VERSION_VALUE="0"
+          
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          
+          if [[ "$BRANCH_NAME" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-beta\.([0-9]+)$ ]]; then
+            PRE_RELEASE_VALUE="true"
+            BETA_VERSION_VALUE="${BASH_REMATCH[2]}"
+          fi
+          
+          echo "PRE_RELEASE_VALUE=$PRE_RELEASE_VALUE" >> $GITHUB_ENV
+          echo "BETA_VERSION_VALUE=$BETA_VERSION_VALUE" >> $GITHUB_ENV
+          echo "Pre-Release status: $PRE_RELEASE_VALUE"
+          echo "Beta Version: $BETA_VERSION_VALUE"
+        shell: bash
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Install dependencies (Linux)
+        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
+        run: sudo apt-get update && sudo apt install rpm squashfs-tools 
+
+      - name: Load certificates (macOS)
+        if: ${{ startsWith(matrix.os, 'macos-') }}
+        env:
+          MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: chmod +x tools/add-macos-cert.sh && . ./tools/add-macos-cert.sh
+      
+      - name: Signing Manager Setup (Windows)
+        if: ${{ startsWith(matrix.os, 'windows-') }}
+        uses: digicert/code-signing-software-trust-action@v1.0.0
+      
+      - name: Write authentication cert to disk (Windows)
+        if: ${{ startsWith(matrix.os, 'windows-') }}
+        shell: bash
+        env:
+          SM_CLIENT_CERT_P12_BASE64: ${{ secrets.SM_CLIENT_CERT_P12_BASE64 }}
+        run: | 
+          echo "$SM_CLIENT_CERT_P12_BASE64" | base64 --decode > /d/cert.p12
+          echo "SM_CLIENT_CERT_FILE=D:\\cert.p12" >> "$GITHUB_ENV" 
+      
+      - name: Sync cert (Windows)
+        if: ${{ startsWith(matrix.os, 'windows-') }}
+        shell: cmd
+        env:
+          CERT_FINGERPRINT: ${{ secrets.CERT_FINGERPRINT }}
+          KEYPAIR_ALIAS: ${{ secrets.KEYPAIR_ALIAS }}
+          SM_API_KEY: ${{ secrets.SM_API_KEY }}
+          SM_CLIENT_CERT_FILE: ${{ env.SM_CLIENT_CERT_FILE }}
+          SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
+          SM_HOST: ${{ secrets.SM_HOST }}
+        run: |
+          smksp_registrar list
+          smctl windows certsync --keypair-alias=%KEYPAIR_ALIAS%
+
+      - name: Package application
+        working-directory: app/desktop
+        run: yarn package --arch=${{ matrix.arch }}
+
+      - name: Make installer
+        working-directory: app/desktop
+        env:
+          PRE_RELEASE: ${{ env.PRE_RELEASE_VALUE }} 
+          BETA_VERSION: ${{ env.BETA_VERSION_VALUE }}
+        run: yarn make --arch=${{ matrix.arch }}
+
+      - name: Build (macOS)
+        working-directory: app/desktop
+        if: ${{ startsWith(matrix.os, 'macos-') }}
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          PRE_RELEASE: ${{ env.PRE_RELEASE_VALUE }}
+          BETA_VERSION: ${{ env.BETA_VERSION_VALUE }}
+        run: yarn run publish --arch=${{ matrix.arch }} --dry-run
+
+      - name: Build (Windows)
+        working-directory: app/desktop
+        if: ${{ startsWith(matrix.os, 'windows-') }}
+        env:
+          CERT_FINGERPRINT: ${{ secrets.CERT_FINGERPRINT }}
+          KEYPAIR_ALIAS: ${{ secrets.KEYPAIR_ALIAS }}
+          SM_API_KEY: ${{ secrets.SM_API_KEY }}
+          SM_CLIENT_CERT_FILE: ${{ env.SM_CLIENT_CERT_FILE }}
+          SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
+          SM_HOST: ${{ secrets.SM_HOST }}
+          PRE_RELEASE: ${{ env.PRE_RELEASE_VALUE }} 
+          BETA_VERSION: ${{ env.BETA_VERSION_VALUE }}
+        run: yarn run publish --arch=${{ matrix.arch }} --dry-run
+
+      - name: Build (Linux)
+        working-directory: app/desktop
+        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
+        env:
+          PRE_RELEASE: ${{ env.PRE_RELEASE_VALUE }} 
+          BETA_VERSION: ${{ env.BETA_VERSION_VALUE }}
+        run: yarn run publish --arch=${{ matrix.arch }} --dry-run
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v5.0.0
+        with:
+          name: build-artifacts-${{ matrix.os }}-${{ matrix.arch }}
+          path: out
+  
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: "yarn"
+          cache-dependency-path: "yarn-lock.yaml"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v6.0.0
+        with:
+          path: out
+          pattern: build-artifacts-*
+          merge-multiple: true
+
+      - name: Set PRE_RELEASE and BETA_VERSION environment variables
+        run: |
+          PRE_RELEASE_VALUE="false"
+          BETA_VERSION_VALUE="0"
+          
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          
+          if [[ "$BRANCH_NAME" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-beta\.([0-9]+)$ ]]; then
+            PRE_RELEASE_VALUE="true"
+            BETA_VERSION_VALUE="${BASH_REMATCH[2]}"
+          fi
+          
+          echo "PRE_RELEASE_VALUE=$PRE_RELEASE_VALUE" >> $GITHUB_ENV
+          echo "BETA_VERSION_VALUE=$BETA_VERSION_VALUE" >> $GITHUB_ENV
+          echo "Pre-Release status: $PRE_RELEASE_VALUE"
+          echo "Beta Version: $BETA_VERSION_VALUE"
+        shell: bash
+
+      - name: Publish to GitHub
+        working-directory: app/desktop
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRE_RELEASE: ${{ env.PRE_RELEASE_VALUE }}
+          BETA_VERSION: ${{ env.BETA_VERSION_VALUE }}
+        run: yarn run publish --from-dry-run

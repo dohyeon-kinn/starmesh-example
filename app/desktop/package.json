@@ -1,0 +1,49 @@
+{
+  "name": "desktop",
+  "productName": "StarMesh",
+  "version": "0.0.1",
+  "description": "StarMesh",
+  "main": ".vite/build/index.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": {
+    "name": "DoHyeon Kim",
+    "email": "dohyeon.kim@gluwa.com"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-router": "^7.10.1"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.10.2",
+    "@electron-forge/maker-deb": "^7.10.2",
+    "@electron-forge/maker-dmg": "^7.10.2",
+    "@electron-forge/maker-rpm": "^7.10.2",
+    "@electron-forge/maker-squirrel": "^7.10.2",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.10.2",
+    "@electron-forge/plugin-fuses": "^7.10.2",
+    "@electron-forge/plugin-vite": "^7.10.2",
+    "@electron-forge/publisher-github": "^7.10.2",
+    "@electron-forge/shared-types": "^7.10.2",
+    "@electron/fuses": "^1.8.0",
+    "@types/electron-squirrel-startup": "^1.0.2",
+    "@types/fs-extra": "^11.0.4",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react-swc": "^4.2.2",
+    "electron": "39.2.4",
+    "fs-extra": "^11.2.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.5",
+    "vite-tsconfig-paths": "^5.1.4"
+  }
+}

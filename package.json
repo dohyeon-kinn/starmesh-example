@@ -2,24 +2,32 @@
   "name": "StarMesh",
   "version": "1.0.0",
   "private": true,
+  "workspaces": {
+    "packages": [
+      "app/browser-extension",
+      "app/desktop",
+      "app/mock-proxy-server"
+    ]
+  },
   "scripts": {
-    "dev:browser-extension": "pnpm --filter=browser-extension dev",
-    "type-check:browser-extension": "pnpm --filter=browser-extension type-check",
-    "dev:server": "pnpm --filter=mock-proxy-server start:dev",
-    "type-check:server": "pnpm --filter=mock-proxy-server type-check",
-    "type-check": "pnpm type-check:browser-extension && pnpm type-check:server",
+    "dev:browser-extension": "yarn workspace browser-extension dev",
+    "dev:desktop": "yarn workspace desktop start",
+    "dev:server": "yarn workspace mock-proxy-server start:dev",
+    "type-check:browser-extension": "yarn workspace browser-extension type-check",
+    "type-check:desktop": "yarn workspace desktop type-check",
+    "type-check:server": "yarn workspace mock-proxy-server type-check",
+    "type-check": "yarn type-check:browser-extension && yarn type-check:server && yarn type-check:desktop",
     "format": "biome check --write --unsafe",
     "prepare": "husky"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.4",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.6",
-    "typescript": "catalog:"
+    "lint-staged": "^16.2.6"
   },
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
   },
-  "packageManager": "pnpm@10.17.0"
+  "packageManager": "yarn@1.22.22"
 }
