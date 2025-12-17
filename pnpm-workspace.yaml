@@ -1,0 +1,7 @@
+minimumReleaseAge: 1440
+
+packages:
+  - app/*
+
+catalog:
+  typescript: ^5.9.3

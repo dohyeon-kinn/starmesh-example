@@ -1,0 +1,96 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "files": {
+    "includes": ["**", "!**/node_modules", "!**/dist"]
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "identifierOrder": "lexicographic",
+            "groups": [
+              { "type": true, "source": [":NODE:", ":PACKAGE:"] },
+              { "type": false, "source": [":NODE:", ":PACKAGE:"] },
+              ":BLANK_LINE:",
+              { "type": true, "source": ["@/**", "./**", "*"] },
+              { "type": false, "source": ["@/**", "./**", "*"] }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "formatter": {
+    "indentWidth": 2,
+    "lineWidth": 120,
+    "indentStyle": "space",
+    "enabled": true,
+    "bracketSpacing": true,
+    "formatWithErrors": false
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "trailingCommas": "all",
+      "semicolons": "always",
+      "bracketSameLine": false
+    },
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "complexity": {
+        "noVoid": "error",
+        "noBannedTypes": "error",
+        "noExtraBooleanCast": "error",
+        "noExcessiveCognitiveComplexity": "error"
+      },
+      "correctness": {
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error"
+      },
+      "performance": {
+        "noBarrelFile": "error",
+        "noReExportAll": "error",
+        "noDelete": "error"
+      },
+      "style": {
+        "useImportType": "off",
+        "noUselessElse": "error",
+        "useCollapsedElseIf": "error",
+        "noNonNullAssertion": "error",
+        "useBlockStatements": "error",
+        "noNestedTernary": "error",
+        "noNamespace": "error",
+        "noYodaExpression": "error",
+        "useConsistentBuiltinInstantiation": "error",
+        "useDefaultSwitchClause": "error",
+        "useThrowNewError": "error",
+        "useThrowOnlyError": "error",
+        "useFilenamingConvention": {
+          "level": "error",
+          "options": {
+            "filenameCases": ["kebab-case"]
+          }
+        }
+      },
+      "suspicious": {
+        "noAssignInExpressions": "error",
+        "noConfusingVoidType": "error",
+        "noDebugger": "error",
+        "noExplicitAny": "error",
+        "noRedeclare": "error",
+        "noEvolvingTypes": "error",
+        "useNumberToFixedDigitsArgument": "error",
+        "noConsole": "off",
+        "noUnknownAtRules": "off"
+      }
+    }
+  }
+}
