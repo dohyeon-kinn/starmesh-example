@@ -78,7 +78,7 @@ jobs:
           echo "target=$TARGET_NAME" >> $GITHUB_OUTPUT
 
       - name: Build Go IPC Server
-        working-directory: app/desktop/resources
+        working-directory: ./app/desktop/resources
         run: make ${{ steps.make_target.outputs.target }}
       
       - name: Set PRE_RELEASE and BETA_VERSION environment variables
@@ -150,18 +150,18 @@ jobs:
           smctl windows certsync --keypair-alias=%KEYPAIR_ALIAS%
 
       - name: Package application
-        working-directory: app/desktop
+        working-directory: ./app/desktop
         run: yarn package --arch=${{ matrix.arch }}
 
       - name: Make installer
-        working-directory: app/desktop
+        working-directory: ./app/desktop
         env:
           PRE_RELEASE: ${{ env.PRE_RELEASE_VALUE }} 
           BETA_VERSION: ${{ env.BETA_VERSION_VALUE }}
         run: yarn make --arch=${{ matrix.arch }}
 
       - name: Build (macOS)
-        working-directory: app/desktop
+        working-directory: ./app/desktop
         if: ${{ startsWith(matrix.os, 'macos-') }}
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -171,7 +171,7 @@ jobs:
         run: yarn run publish --arch=${{ matrix.arch }} --dry-run
 
       - name: Build (Windows)
-        working-directory: app/desktop
+        working-directory: ./app/desktop
         if: ${{ startsWith(matrix.os, 'windows-') }}
         env:
           CERT_FINGERPRINT: ${{ secrets.CERT_FINGERPRINT }}
@@ -185,7 +185,7 @@ jobs:
         run: yarn run publish --arch=${{ matrix.arch }} --dry-run
 
       - name: Build (Linux)
-        working-directory: app/desktop
+        working-directory: ./app/desktop
         if: ${{ startsWith(matrix.os, 'ubuntu-') }}
         env:
           PRE_RELEASE: ${{ env.PRE_RELEASE_VALUE }} 
@@ -247,7 +247,7 @@ jobs:
         shell: bash
 
       - name: Publish to GitHub
-        working-directory: app/desktop
+        working-directory: ./app/desktop
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRE_RELEASE: ${{ env.PRE_RELEASE_VALUE }}

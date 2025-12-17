@@ -92,4 +92,4 @@ typings/
 out/
 
 # Resources
-resources/go_ipc_server*
+resources/go_ipc_server_*
