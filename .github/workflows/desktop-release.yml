@@ -196,7 +196,7 @@ jobs:
         uses: actions/upload-artifact@v5.0.0
         with:
           name: build-artifacts-${{ matrix.os }}-${{ matrix.arch }}
-          path: out
+          path: ./app/desktop/out
   
   release:
     runs-on: ubuntu-latest
@@ -216,7 +216,6 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: "yarn"
-          cache-dependency-path: "yarn-lock.yaml"
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -224,7 +223,7 @@ jobs:
       - name: Download All Artifacts
         uses: actions/download-artifact@v6.0.0
         with:
-          path: out
+          path: ./app/desktop/out
           pattern: build-artifacts-*
           merge-multiple: true
 

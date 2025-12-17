@@ -90,7 +90,7 @@ const config: ForgeConfig = {
     new PublisherGithub({
       repository: {
         owner: 'dohyeon-kinn',
-        name: 'electron-example',
+        name: 'starmesh-example',
       },
       tagPrefix: process.env.PRE_RELEASE === 'true' ? `beta.${process.env.BETA_VERSION ?? 0}-v` : 'v',
       draft: false,
