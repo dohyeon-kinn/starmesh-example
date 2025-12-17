@@ -1,22 +1,37 @@
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.enableShutdownHooks();
+  const app = await NestFactory.create(AppModule, { bodyParser: false });
   app.enableCors();
 
-  const options = new DocumentBuilder()
-    .setTitle('mock-proxy-server swagger')
-    .addBearerAuth()
-    .setVersion('0.0.1')
-    .build();
+  app.use('/proxy', (req, res, next) => {
+    const raw = req.query?.url;
+    if (!raw || typeof raw !== 'string' || !raw.startsWith('http')) {
+      res.status(400).send('Missing ?url=');
+      return;
+    }
 
-  const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup('docs', app, document, { jsonDocumentUrl: 'docs/json' });
-  await app.listen(3000);
+    let url: URL;
+    try {
+      url = new URL(raw);
+    } catch {
+      res.status(400).send('Invalid url');
+      return;
+    }
+
+    return createProxyMiddleware({
+      target: url.origin,
+      changeOrigin: true,
+      secure: true,
+      followRedirects: true,
+      pathRewrite: () => `${url.pathname}${url.search}`,
+    })(req, res, next);
+  });
+
+  await app.listen(4000);
 }
 
 bootstrap();
