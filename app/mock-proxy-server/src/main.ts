@@ -1,37 +1,28 @@
 import { NestFactory } from '@nestjs/core';
-import { createProxyMiddleware } from 'http-proxy-middleware';
+import { Server } from 'proxy-chain';
 
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bodyParser: false });
   app.enableCors();
-
-  app.use('/proxy', (req, res, next) => {
-    const raw = req.query?.url;
-    if (!raw || typeof raw !== 'string' || !raw.startsWith('http')) {
-      res.status(400).send('Missing ?url=');
-      return;
-    }
-
-    let url: URL;
-    try {
-      url = new URL(raw);
-    } catch {
-      res.status(400).send('Invalid url');
-      return;
-    }
-
-    return createProxyMiddleware({
-      target: url.origin,
-      changeOrigin: true,
-      secure: true,
-      followRedirects: true,
-      pathRewrite: () => `${url.pathname}${url.search}`,
-    })(req, res, next);
+  const proxyServer = new Server({
+    port: 8000,
+    verbose: true,
+    prepareRequestFunction: () => {
+      return {
+        requestAuthentication: false,
+        upstreamProxyUrl: null,
+      };
+    },
   });
-
-  await app.listen(4000);
+  await proxyServer.listen();
+  proxyServer.on('connection', (connection) => {
+    console.log(connection);
+  });
+  proxyServer.on('request', (request) => {
+    console.log(request);
+  });
 }
 
 bootstrap();
