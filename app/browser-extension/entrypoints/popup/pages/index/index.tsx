@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
+
 import './index.css';
 
 export function Index() {
   const [vpnStatus, setVpnStatus] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const handleToggle = async () => {
     setVpnStatus(!vpnStatus);
@@ -44,6 +47,10 @@ export function Index() {
         <p className="status-main">VPN이 {vpnStatus ? '활성화' : '비활성화'} 상태입니다</p>
         <p className="status-sub">버튼을 누르면 {vpnStatus ? '비활성화' : '활성화'} 됩니다</p>
       </div>
+
+      <button type="button" className="back-button" onClick={() => navigate('/login')}>
+        Login
+      </button>
     </div>
   );
 }

@@ -5,7 +5,7 @@ export default defineConfig({
   manifest: {
     name: 'StarMesh VPN',
     description: 'StarMesh VPN',
-    permissions: ['webRequest', 'proxy', 'webRequestAuthProvider'],
+    permissions: ['webRequest', 'proxy', 'webRequestAuthProvider', 'storage'],
     host_permissions: ['<all_urls>'],
   },
 });

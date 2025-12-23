@@ -22,7 +22,7 @@
   pointer-events: none;
 }
 
-.lock-circle {
+.wallet-circle {
   position: relative;
   width: 280px;
   height: 280px;
@@ -33,7 +33,7 @@
   justify-content: center;
 }
 
-.lock-rings {
+.wallet-rings {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -81,70 +81,10 @@
   }
 }
 
-.lock-icon {
+.wallet-icon {
   position: relative;
   z-index: 2;
   filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
-}
-
-.lock-status {
-  position: relative;
-  z-index: 2;
-  color: white;
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: 2px;
-}
-
-.toggle-container {
-  margin-bottom: 50px;
-}
-
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 30px;
-  cursor: pointer;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 107, 53, 0.3);
-  transition: 0.3s;
-  border-radius: 30px;
-}
-
-.toggle-slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 2px;
-  bottom: 2px;
-  background-color: white;
-  transition: 0.3s;
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.toggle-switch input:checked + .toggle-slider {
-  background-color: rgba(255, 107, 53, 0.6);
-}
-
-.toggle-switch input:checked + .toggle-slider:before {
-  transform: translateX(30px);
 }
 
 .status-text {
@@ -163,6 +103,68 @@
   color: rgba(255, 255, 255, 0.5);
   font-size: 12px;
   font-weight: 400;
+}
+
+.wallet-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 30px;
+  width: 100%;
+  padding: 0 20px;
+}
+
+.wallet-button {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 260px;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.8) 0%, rgba(210, 105, 30, 0.8) 100%);
+  border: 1px solid rgba(255, 107, 53, 0.5);
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.wallet-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 1) 0%, rgba(210, 105, 30, 1) 100%);
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.5);
+  transform: translateY(-2px);
+}
+
+.wallet-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.wallet-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.wallet-button.disconnect {
+  background: linear-gradient(135deg, rgba(220, 53, 69, 0.8) 0%, rgba(200, 35, 51, 0.8) 100%);
+  border-color: rgba(220, 53, 69, 0.5);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.wallet-button.disconnect:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(220, 53, 69, 1) 0%, rgba(200, 35, 51, 1) 100%);
+  box-shadow: 0 6px 16px rgba(220, 53, 69, 0.5);
+}
+
+.error-text {
+  position: relative;
+  z-index: 2;
+  color: rgba(220, 53, 69, 0.9);
+  font-size: 12px;
+  text-align: center;
+  margin-top: 4px;
 }
 
 .back-button {
