@@ -13,4 +13,11 @@ export default defineBackground(async () => {
     },
     scope: 'regular',
   });
+  browser.proxy.onProxyError.addListener(async () => {
+    const errorPageUrl = browser.runtime.getURL('/proxy-error.html');
+    const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true });
+    if (activeTab?.id) {
+      await browser.tabs.update(activeTab.id, { url: errorPageUrl });
+    }
+  });
 });

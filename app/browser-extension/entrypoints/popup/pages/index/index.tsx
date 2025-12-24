@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router';
 import './index.css';
 
 export function Index() {
-  const [vpnStatus, setVpnStatus] = useState<boolean>(false);
+  const [proxyStatus, setProxyStatus] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleToggle = async () => {
-    setVpnStatus(!vpnStatus);
+    setProxyStatus((prev) => !prev);
   };
 
   return (
@@ -38,14 +38,14 @@ export function Index() {
 
       <div className="toggle-container">
         <label className="toggle-switch">
-          <input type="checkbox" checked={vpnStatus} onChange={handleToggle} />
+          <input type="checkbox" checked={proxyStatus} onChange={handleToggle} />
           <span className="toggle-slider"></span>
         </label>
       </div>
 
       <div className="status-text">
-        <p className="status-main">VPN이 {vpnStatus ? '활성화' : '비활성화'} 상태입니다</p>
-        <p className="status-sub">버튼을 누르면 {vpnStatus ? '비활성화' : '활성화'} 됩니다</p>
+        <p className="status-main">프록시가 {proxyStatus ? '활성화' : '비활성화'} 상태입니다</p>
+        <p className="status-sub">버튼을 누르면 {proxyStatus ? '비활성화' : '활성화'} 됩니다</p>
       </div>
 
       <button type="button" className="back-button" onClick={() => navigate('/login')}>
